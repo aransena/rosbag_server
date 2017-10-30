@@ -1,0 +1,10 @@
+#goal definition
+string save_folder
+string save_name
+float32 duration
+---
+#result definition
+string outcome
+---
+#feedback
+string status
