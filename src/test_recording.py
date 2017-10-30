@@ -13,7 +13,7 @@ def feedback(msg):
 def recording_client():
     client = actionlib.SimpleActionClient('recording_server', RecordingAction)
     client.wait_for_server()
-    goal = RecordingGoal(save_folder=os.path.join(os.getenv("HOME"), "output"), duration=0, save_name="2")
+    goal = RecordingGoal(save_folder=os.path.join(os.getenv("HOME"), "output"), duration=3, save_name="3")
     client.send_goal(goal, feedback_cb=feedback)
     # #
     time.sleep(5)
