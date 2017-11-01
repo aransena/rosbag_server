@@ -8,7 +8,7 @@ import os
 from rosbag_server.msg import RecordingAction, RecordingGoal
 
 def feedback(msg):
-    print msg
+    print msg.status.split(',')
 
 
 def recording_client():
@@ -20,21 +20,19 @@ def recording_client():
                          topics=['/topic1', '/topic2'],
                          args=['--size=10'])
     client.send_goal(goal, feedback_cb=feedback)
-    # #
+
     time.sleep(5)
     client.cancel_goal()
     client.wait_for_result()
-    result = client.get_result()
+    _result = client.get_result()
 
-    print "Result: ", result
-
-    return result
+    return _result
 
 
 if __name__=='__main__':
     try:
         rospy.init_node('recording_test_client')
         result = recording_client()
-        print "Result: ", result
+        print result.outcome.split(',')
     except rospy.ROSInterruptException:
         print "Program interrupted"
