@@ -8,7 +8,7 @@ import psutil
 
 import subprocess, os, signal
 
-from sawyer_learning_interface.msg import RecordingAction, RecordingResult, RecordingFeedback
+from rosbag_server.msg import RecordingAction, RecordingResult, RecordingFeedback
 
 
 def terminate_process_and_children(p):
@@ -31,6 +31,7 @@ class RobotRecordServer(object):
         self._as.register_preempt_callback(self.preempt_cb)
         self._testing = testing
         self._home_folder = os.getenv("HOME")
+        rospy.loginfo("rosbag Server Running")
         self._as.start()
 
     def preempt_cb(self):
@@ -39,7 +40,7 @@ class RobotRecordServer(object):
     def execute_cb(self, goal):
         wait_rate = rospy.Rate(10)
         success = True
-        print "GOAL timeout: ", goal.duration
+        print "GOAL topics: ", goal.topics
         if goal.save_name == "":
             bagname = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
             self._feedback.status = "status: no_filename:"+bagname+".bag"
@@ -67,17 +68,24 @@ class RobotRecordServer(object):
                 test_playback = subprocess.Popen(cmd, stdin=subprocess.PIPE, shell=True, cwd=test_bag_folder)
 
 
-            cmd = "rosbag record /robot/joint_states"
-            if goal.duration > 0:
-                cmd += " --duration " + str(goal.duration + 0.2)
+            cmd = "rosbag record "
 
-            cmd += " -O " + bagname + ".bag"
+
+            for topic in goal.topics:
+                cmd += topic + " "
+
+            for arg in goal.args:
+                cmd += arg + " "
+
+            print "CMD: ", cmd
+
+            cmd += "-O " + bagname + ".bag"
 
             print cmd
             bag_recorder = subprocess.Popen(cmd, stdin=subprocess.PIPE,
                                             stdout=subprocess.PIPE, shell=True, cwd=bagfolder)
             time.sleep(0.1)
-            self._feedback.status = "status: Recording started"
+            self._feedback.status = "status: Recording started with command [" + cmd + "]"
             self._as.publish_feedback(self._feedback)
 
             start_time = time.time()

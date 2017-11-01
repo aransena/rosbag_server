@@ -4,7 +4,8 @@ import rospy
 import time
 import actionlib
 import os
-from sawyer_learning_interface.msg import RecordingAction, RecordingGoal
+
+from rosbag_server.msg import RecordingAction, RecordingGoal
 
 def feedback(msg):
     print msg
@@ -13,7 +14,11 @@ def feedback(msg):
 def recording_client():
     client = actionlib.SimpleActionClient('recording_server', RecordingAction)
     client.wait_for_server()
-    goal = RecordingGoal(save_folder=os.path.join(os.getenv("HOME"), "output"), duration=3, save_name="3")
+    goal = RecordingGoal(save_folder=os.path.join(os.getenv("HOME"), "output"),
+                         duration=3,
+                         save_name="",
+                         topics=['/topic1', '/topic2'],
+                         args=['--size=10'])
     client.send_goal(goal, feedback_cb=feedback)
     # #
     time.sleep(5)

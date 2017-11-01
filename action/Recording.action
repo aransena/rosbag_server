@@ -1,7 +1,8 @@
 #goal definition
 string save_folder
 string save_name
-float32 duration
+string[] topics
+string[] args
 ---
 #result definition
 string outcome
