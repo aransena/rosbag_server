@@ -22,14 +22,13 @@ class RobotRecordServer(object):
     _feedback = RecordingFeedback()
     _result = RecordingResult()
 
-    def __init__(self, name, testing=False):
+    def __init__(self, name):
         self._action_name = name
         self._as = actionlib.SimpleActionServer(self._action_name,
                                                 RecordingAction,
                                                 execute_cb=self.execute_cb,
                                                 auto_start=False)
         self._as.register_preempt_callback(self.preempt_cb)
-        self._testing = testing
         self._home_folder = os.getenv("HOME")
         rospy.loginfo("rosbag server running")
         self._as.start()
@@ -45,44 +44,40 @@ class RobotRecordServer(object):
         else:
             bagname = goal.save_name
 
+        if ".bag" not in bagname:
+            bagname += ".bag"
+
         if goal.save_folder == "":
             bagfolder = self._home_folder
         else:
             bagfolder = goal.save_folder
 
-        bagpath = os.path.join(bagfolder, bagname+".bag")
+        bagpath = os.path.join(bagfolder, bagname)
 
         self._feedback.status = "setup,file," + bagpath
         self._as.publish_feedback(self._feedback)
 
         if os.path.isfile(bagpath):
-            self._result.outcome = "error,exists," + bagname + ".bag already exists in " + bagfolder
+            self._result.outcome = "error,exists," + bagname + " already exists in " + bagfolder
             self._as.set_aborted(self._result)
 
         else:
-            test_playback = None
-            if self._testing:
-                test_bag_folder = os.path.join(self._home_folder, "bagfiles")
-                test_bag = "2017-10-27-14-20-57.bag"
-                cmd = "rosbag play " + test_bag
-                test_playback = subprocess.Popen(cmd, stdin=subprocess.PIPE, shell=True, cwd=test_bag_folder)
 
-            cmd = "rosbag record "
+            cmd = "rosbag record"
 
             for topic in goal.topics:
-                cmd += topic + " "
+                cmd += " " + topic
+
+            cmd += " -O " + bagname
 
             for arg in goal.args:
-                cmd += arg + " "
+                cmd += " " + arg
 
-            print "CMD: ", cmd
-
-            cmd += "-O " + bagname + ".bag"
-
-            print cmd
             bag_recorder = subprocess.Popen(cmd, stdin=subprocess.PIPE,
-                                            stdout=subprocess.PIPE, shell=True, cwd=bagfolder)
-            time.sleep(0.1)
+                                            shell=True,
+                                            cwd=bagfolder,
+                                            preexec_fn=os.setsid)
+
             self._feedback.status = "start,command," + cmd
             self._as.publish_feedback(self._feedback)
 
@@ -104,22 +99,22 @@ class RobotRecordServer(object):
                     break
                 wait_rate.sleep()
 
-            bag_recorder.send_signal(subprocess.signal.SIGINT)
-
-            if self._testing:
-                terminate_process_and_children(test_playback)
+            pid = bag_recorder.pid
+            os.killpg(pid, signal.SIGINT)
 
             self._feedback.status = "stop,time," + str(round(elapsed_time, 2)) + ",sec"
             self._as.publish_feedback(self._feedback)
 
-            if success:
-                cmds = ["rosbag reindex *.active", "rm *.orig.*", "rename 's/.active//' *"]
-                for cmd in cmds:
-                    try:
-                        subprocess.call(cmd, shell=True, cwd=bagfolder)
-                    except Exception as e:
-                        print e, e.message
-                        pass
+            # if success:
+            #     time.sleep(2)
+            #     cmds = ["rosbag reindex *.active", "rm *.orig.*", "rename 's/.active//' *"]
+            #     for cmd in cmds:
+            #         try:
+            #             subprocess.call(cmd, shell=True, cwd=bagfolder)
+            #             time.sleep(1)
+            #         except Exception as e:
+            #             print e, e.message
+            #             pass
 
             if not success:
                 self._result.outcome = "error,"
@@ -138,5 +133,5 @@ class RobotRecordServer(object):
 
 if __name__ == '__main__':
     rospy.init_node('recording_server')
-    server = RobotRecordServer(rospy.get_name(), testing=False)
+    server = RobotRecordServer(rospy.get_name())
     rospy.spin()
