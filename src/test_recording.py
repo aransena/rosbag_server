@@ -22,10 +22,10 @@ def recording_client(filename):
     global client
     client = actionlib.SimpleActionClient('recording_server', RecordingAction)
     client.wait_for_server()
-    goal = RecordingGoal(save_folder=os.path.join(os.getenv("HOME"), "tray_data", "demo_15"),
-                         save_name="demo", # save_name="bagname" OR save_name="bagname.bag"
-                         topics=['/robot/limb/right/endpoint_state', '/robot/joint_states'], # topics=['/topic1','/topic2']
-                         args=None)#['-l', '1']) # args=['arg1','arg2']
+    goal = RecordingGoal(save_folder=os.path.join(os.getenv("HOME"), "tray_data_ver2", "grid"),
+                         save_name="goal", # save_name="bagname" OR save_name="bagname.bag"
+                         topics=['/robot/limb/right/endpoint_state', '/robot/joint_states', '/hand_control'], # topics=['/topic1','/topic2']
+                         args=['-l', '1']) # args=['arg1','arg2']
 
     client.send_goal(goal, feedback_cb=feedback)
     client.wait_for_result()

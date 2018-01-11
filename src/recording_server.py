@@ -57,6 +57,9 @@ class RobotRecordServer(object):
         self._feedback.status = "setup,file," + bagpath
         self._as.publish_feedback(self._feedback)
 
+        if not os.path.os.path.isdir(bagfolder):
+            os.makedirs(bagfolder)
+
         if os.path.isfile(bagpath):
             self._result.outcome = "error,exists," + bagname + " already exists in " + bagfolder
             self._as.set_aborted(self._result)
