@@ -36,7 +36,7 @@ def key_listener():
 if __name__=='__main__':
     global client
     rospy.init_node('recording_test_client')
-    client = RobotRecordClient()
+    client = RobotRecordClient('rosbag_server')
     t = threading.Thread(target=key_listener)
     t.start()
     keyboard_control = keyboard.Controller()

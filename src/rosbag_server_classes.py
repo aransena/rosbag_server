@@ -24,7 +24,7 @@ class RobotRecordServer(object):
     _feedback = RecordingFeedback()
     _result = RecordingResult()
 
-    def __init__(self, name):
+    def __init__(self, name='rosbag_server'):
         self._action_name = name
         self._as = actionlib.SimpleActionServer(self._action_name,
                                                 RecordingAction,
@@ -126,15 +126,17 @@ class RobotRecordServer(object):
 
 
 class RobotRecordClient(object):
-    def __init__(self):
+
+    def __init__(self, name='rosbag_server'):
         self._client = None
+        self._name = name
         self._result = None
         self._goal = None
         self._result = None
         self._connect_to_server()
 
     def _connect_to_server(self):
-        self._client = actionlib.SimpleActionClient('recording_server', RecordingAction)
+        self._client = actionlib.SimpleActionClient(self._name, RecordingAction)
         self._client.wait_for_server()
 
     def _set_goal(self, savefolder, savename, topic_list, rosbag_args_list=[]):
