@@ -12,7 +12,6 @@ import signal
 
 from rosbag_server.msg import RecordingAction, RecordingResult, RecordingFeedback, RecordingGoal
 
-
 def terminate_process_and_children(p):
     process = psutil.Process(p.pid)
     for sub_process in process.get_children(recursive=True):
