@@ -39,7 +39,7 @@ Example output with client printing feedback messages as defined above, recordin
 
 Server reports it is setting up to record with the path ./test.bag
 ```
-['setup', 'path', './test.bag']
+['setup', 'path', '<your path to the bag data folder>/test.bag']
 ```
 
 Server reports the command sent to it in full
