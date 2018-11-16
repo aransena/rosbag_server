@@ -12,6 +12,7 @@ import signal
 
 from rosbag_server.msg import RecordingAction, RecordingResult, RecordingFeedback, RecordingGoal
 
+
 def terminate_process_and_children(p):
     process = psutil.Process(p.pid)
     for sub_process in process.get_children(recursive=True):
@@ -19,11 +20,11 @@ def terminate_process_and_children(p):
     p.wait()
 
 
-class RobotRecordServer(object):
+class RosbagServer(object):
     _feedback = RecordingFeedback()
     _result = RecordingResult()
 
-    def __init__(self, name='rosbag_server'):
+    def __init__(self, name='rosbag_server', log_interval=5):
         self._action_name = name
         self._as = actionlib.SimpleActionServer(self._action_name,
                                                 RecordingAction,
@@ -32,6 +33,7 @@ class RobotRecordServer(object):
         self._as.register_preempt_callback(self.preempt_cb)
         self._home_folder = os.getenv("HOME")
         rospy.loginfo("rosbag server running")
+        self._log_interval = log_interval
         self._as.start()
 
     def preempt_cb(self):
@@ -55,7 +57,7 @@ class RobotRecordServer(object):
 
         bagpath = os.path.join(bagfolder, bagname)
 
-        self._feedback.status = "setup,file," + bagpath
+        self._feedback.status = "setup,path," + bagpath
         self._as.publish_feedback(self._feedback)
 
         if not os.path.os.path.isdir(bagfolder):
@@ -88,25 +90,29 @@ class RobotRecordServer(object):
             start_time = time.time()
             elapsed_time = start_time
             logged = False
-            while not self._as.is_preempt_requested():
+            while not self._as.is_preempt_requested() and bag_recorder.poll() is None:
                 elapsed_time = time.time() - start_time
 
-                log_interval = 5.0
-                if int(elapsed_time) % log_interval == 0 and not logged:
-                    self._feedback.status = "recording,time," + str(round(elapsed_time, 2)) + ",sec"
+                if int(elapsed_time) % self._log_interval == 0 and not logged:
+                    self._feedback.status = "recording,elapsed_time," + str(round(elapsed_time, 2))
                     self._as.publish_feedback(self._feedback)
                     logged = True
-                elif int(elapsed_time) % log_interval != 0 and logged:
+
+                elif int(elapsed_time) % self._log_interval != 0 and logged:
                     logged = False
 
                 if self._as.is_preempt_requested():
                     break
                 wait_rate.sleep()
 
-            pid = bag_recorder.pid
-            os.killpg(pid, signal.SIGINT)
+            try:
+                pid = bag_recorder.pid
+                os.killpg(pid, signal.SIGINT)
 
-            self._feedback.status = "stop,time," + str(round(elapsed_time, 2)) + ",sec"
+            except Exception as e:
+                pass
+
+            self._feedback.status = "stop,elapsed_time," + str(round(elapsed_time, 2))
             self._as.publish_feedback(self._feedback)
 
             if not success:
@@ -122,46 +128,5 @@ class RobotRecordServer(object):
                 rospy.loginfo('%s: Succeeded' % self._action_name)
 
             self._as.set_preempted(self._result)
-
-
-class RobotRecordClient(object):
-
-    def __init__(self, name='rosbag_server'):
-        self._client = None
-        self._name = name
-        self._result = None
-        self._goal = None
-        self._result = None
-        self._connect_to_server()
-
-    def _connect_to_server(self):
-        self._client = actionlib.SimpleActionClient(self._name, RecordingAction)
-        self._client.wait_for_server()
-
-    def _set_goal(self, savefolder, savename, topic_list, rosbag_args_list=[]):
-        self._goal = RecordingGoal(save_folder=savefolder,
-                                   save_name=savename,  # save_name="bagname" OR save_name="bagname.bag"
-                                   topics=topic_list,  # topic_list=['/topic1','/topic2']
-                                   args=rosbag_args_list)  # arg_list=['arg1','arg2']
-
-    def _send_goal(self, feedback_callback = None):
-        self._client.send_goal(self._goal, feedback_cb=feedback_callback)
-        self._client.wait_for_result()
-        result = self._client.get_result()
-        return result
-
-    def record(self, savefolder, savename, topic_list, rosbag_args_list=[], feedback_callback=None):  #, postrecord_fn=None,postrecord_fn_args=None):
-        self._set_goal(savefolder, savename, topic_list, rosbag_args_list)
-        self._result = self._send_goal(feedback_callback)
-        # if postrecord_fn:
-        #     if postrecord_fn_args:
-        #         postrecord_fn(postrecord_fn_args)
-        #     else:
-        #         postrecord_fn
-        return self._result
-
-    def stop(self):
-        self._client.cancel_goal()
-
 
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import rospy
-from rosbag_server_classes import RobotRecordServer
+from rosbagServer import RosbagServer
 
 if __name__ == '__main__':
     rospy.init_node('rosbag_server')
-    server = RobotRecordServer(rospy.get_name())
+    server = RosbagServer(rospy.get_name(), log_interval=5)
     rospy.loginfo("rosbag server ready")
     rospy.spin()
