@@ -56,7 +56,7 @@ Server provides updates on recording status
 ['success', 'path', '<your path to the bag data folder>/test.bag']
 ```
 
-The client can be cancelled at any point after recording stops using
+The client can be cancelled at any point after recording starts using
 ```
 client.stop()
 ```
