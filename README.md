@@ -23,15 +23,17 @@ def record(self, savefolder, savename, topic_list, rosbag_args_list=[], feedback
 
 Note that the provided save folder and name must be unique - the server will return an error status if the requested bag path already exists.
 
+Example client setup:
+```python
+result = client.record("./", "test", ["/test10", "/test100", "/test1000"],[-l 100], feedback_callback=feedback)
+```
+
+Example feedback function:
 ```python
 def feedback(msg):
     print msg.status.split(',')
 ```
 
-Example client setup:
-```python
-result = client.record("./", "test", ["/test10", "/test100", "/test1000"],[-l 100], feedback_callback=feedback)
-```
 
 Example output with client printing feedback messages as defined above, recording from three test topics publishing Empty messages at 10, 100, and 1k Hz.
 
