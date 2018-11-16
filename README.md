@@ -17,11 +17,11 @@ client = RobotRecordClient('rosbag_server')
 
 ## Recording topics and getting feedback
 To record topics, send a requests to the server using the record function. rosbag args and feedback callback functions are optional.
-
-Note that the provided save folder and name must be unique - the server will return an error status if the requested bag path already exists.
 ```python
 def record(self, savefolder, savename, topic_list, rosbag_args_list=[], feedback_callback=None)
 ```
+
+Note that the provided save folder and name must be unique - the server will return an error status if the requested bag path already exists.
 
 ```python
 def feedback(msg):
