@@ -1,6 +1,6 @@
 # rosbag_server
 
-## Goal definition
+### Goal definition
 string save_folder
 
 string save_name
@@ -10,11 +10,11 @@ string[] topics
 string[] args
 
 
-## Result definition
+### Result definition
 string outcome
 
 
-## Feedback message
+### Feedback message
 string status
 
 
