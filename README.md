@@ -1,6 +1,8 @@
 # rosbag_server
 This package provides an actionlib interface to rosbag. The client is able to send a rosbag record command to the server with their selection of topics and args, and can receive basic status updates from the server. The client also has the option of interrupting and cancelling the recording action.
 
+Example cilent in scripts/
+
 ## Starting the server
 To start the server, run:
 ```
