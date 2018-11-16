@@ -12,7 +12,7 @@ To interact with the server, define a client in your code
 ```python
 from rosbagClient import RosbagClient
 ...
-client = RobotRecordClient('rosbag_server')
+client = RosbagClient('rosbag_server')
 ```
 
 ## Recording topics and getting feedback
