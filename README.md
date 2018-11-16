@@ -54,4 +54,8 @@ Server provides updates on recording status
 ['success', 'path', '<your path to the bag data folder>/test.bag']
 ```
 
-The client can be cancelled
+The client can be cancelled at any point after recording stops using
+```
+client.stop()
+```
+however the server should clean up any threads if recording stops naturally (e.g. after 100 messages recorded on each topic in the example above).
