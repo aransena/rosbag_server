@@ -10,7 +10,7 @@ rosrun rosbag_server start_server.py
 ## Initialising the client
 To interact with the server, define a client in your code
 ```python
-from rosbag_server_classes import RobotRecordClient
+from rosbagClient import RosbagClient
 ...
 client = RobotRecordClient('rosbag_server')
 ```
