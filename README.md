@@ -49,7 +49,7 @@ Server reports the command sent to it in full
 ['start', 'command', 'rosbag record /test10 /test100 /test1000 -O test.bag -l 100']
 ```
 
-Server provides updates on recording status
+Client receives server provided updates on recording status
 ```
 ['recording', 'elapsed_time', '0.0']
 ['recording', 'elapsed_time', '5.09']
