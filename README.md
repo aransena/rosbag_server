@@ -18,7 +18,7 @@ client = RosbagClient('rosbag_server')
 ```
 
 ## Recording topics and getting feedback
-To record topics, send a requests to the server using the record function. rosbag args and feedback callback functions are optional.
+To record topics, send a request to the server using the record function. rosbag args and feedback callback functions are optional.
 ```python
 def record(self, savefolder, savename, topic_list, rosbag_args_list=[], feedback_callback=None)
 ```
