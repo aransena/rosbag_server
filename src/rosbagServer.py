@@ -121,7 +121,7 @@ class RosbagServer(object):
                 try:
                     subprocess.call(cmd, shell=True, cwd=bagfolder)
                 except Exception as e:
-                    print e, e.message
+                    print(e, e.message)
 
             else:
                 self._result.outcome = "success,path," + bagpath
